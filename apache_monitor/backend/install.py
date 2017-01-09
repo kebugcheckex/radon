@@ -42,7 +42,7 @@ sql_tables = [
         `host`	TEXT NOT NULL UNIQUE,
         `description`   TEXT
     )''',
-    '''CREATE TABLE `email_recipients` (
+    '''CREATE TABLE IF NOT EXISTS  `email_recipients` (
         `id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
         `email`	TEXT NOT NULL UNIQUE,
         `name`	TEXT
@@ -81,9 +81,12 @@ for param in config.host_ignore_list:
     c.execute(sql_host_ignore, (param[0], param[1]))
 conn.commit()
 
-sql_agent_mock = 'INSERT INTO `host_agent_list`' \
-                 '(id, keyword, description) VALUES (?, ?)'
-c.execute(sql_agent_mock, (1, 'http://www.google.com/bot.html', 'Googlebot'))
-conn.commit()
-
+sql_agent_mock = 'INSERT INTO `agent_ignore_list`' \
+                 '(id, keyword, description) VALUES (?, ?, ?)'
+try:
+    c.execute(sql_agent_mock, (1, 'http://www.google.com/bot.html', 'Googlebot'))
+    conn.commit()
+except:
+    # idempotence, do nothing here
+    print('')
 print('Database installation completed.')
